@@ -1,0 +1,7 @@
+#name : PRE
+#contributor : Rick Moynihan <rick@sourcesmouth.co.uk>
+#key : pre
+# --
+<pre lang="${1}">
+$0
+</pre>

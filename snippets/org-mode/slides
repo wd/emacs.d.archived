@@ -1,0 +1,12 @@
+#name : slides title
+#key : slides
+# --
+#+STYLE: <link rel="stylesheet" type="text/css" href="https://raw.github.com/wd/org-info-js/master/stylesheet.css" />
+#+INFOJS_OPT: path:https://raw.github.com/wd/org-info-js/master/org-info.js
+#+INFOJS_OPT: toc:t localtoc:t view:info mouse:underline buttons:nil
+#+OPTIONS: num:nil
+
+#+TITLE: $1
+#+AUTHOR: wd
+#+EMAIL: $2
+$0
