@@ -1,11 +1,8 @@
-(setq exec-path (append exec-path '("~/bin/") ))
+(if (window-system)
+    (set-frame-size
+     (selected-frame) 120 50))
 
-;; 让 shell 变量起作用
-(use-package exec-path-from-shell
-  :config
-  (when (memq window-system '(mac ns))
-    (exec-path-from-shell-initialize))
-  )
+(setq exec-path (append exec-path '("~/bin/") ))
 
 ;; set python-mode use ipython global
 (setenv "IPY_TEST_SIMPLE_PROMPT" "1")

@@ -1,6 +1,22 @@
 (require 'use-package)
 
+;; 让 shell  变量起作用
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (when (memq window-system '(mac ns))
+    (exec-path-from-shell-initialize))
+  )
+
+
+(use-package ample-theme
+  :ensure t
+  :config
+  (load-theme 'ample t t)
+  )
+
 (use-package zenburn-theme
+  :disabled
   :ensure t
   :config
   (load-theme 'zenburn t)
@@ -9,6 +25,8 @@
 ;; fonts
 (use-package chinese-fonts-setup
   :ensure t
+  :config
+  (chinese-fonts-setup-enable)
   )
 
 (use-package ido
@@ -166,7 +184,6 @@
   :ensure t
   :config
   (setq lua-indent-level 4)
-  (setq-local helm-dash-docsets '("Lua_5.3"))
   )
 
 ;; smartparens
@@ -194,17 +211,17 @@
 ;;   )
 
 
-(use-package ace-window
-  :ensure t
-  :config
-  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-;;  (setq aw-ignore-current t)
-  (global-set-key (kbd "C-x o") #'ace-window)
-  ;; (custom-set-faces
-  ;;  '(aw-leading-char-face
-  ;;    ((t (:height 20.0 )))
-  ;;    ))
-  )
+;; (use-package ace-window
+;;   :ensure t
+;;   :config
+;;   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+;; ;;  (setq aw-ignore-current t)
+;;   (global-set-key (kbd "C-x o") #'ace-window)
+;;   ;; (custom-set-faces
+;;   ;;  '(aw-leading-char-face
+;;   ;;    ((t (:height 20.0 )))
+;;   ;;    ))
+;;   )
 
 
 (use-package easy-kill
@@ -487,5 +504,12 @@
               " "
               filename-and-process)))
   :bind ("C-x C-b" . ibuffer))
+
+(use-package golden-ratio
+  :ensure t
+  :config
+  (setq golden-ratio-auto-scale 1)
+  (golden-ratio-mode 1)
+  )
 
 (provide 'wd-elpa)
