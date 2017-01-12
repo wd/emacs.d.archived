@@ -1,5 +1,3 @@
-;; -*- mode: Emacs-Lisp; outline-regexp: ";;; \\|(use-package "; -*-
-
 (require 'use-package)
 
 ;; 让 shell  变量起作用
@@ -436,7 +434,8 @@
 
 (use-package python-magic
   :ensure outline-magic
-  :bind ("M-o" . outline-cycle)
+  :config
+  (add-hook 'python-mode-hook 'my-python-outline-hook)
   )
 
 (use-package flycheck
@@ -526,11 +525,13 @@
 
 (use-package outline
   :config
-  (add-hook 'outline-minor-mode-hook
+  (add-hook 'emacs-lisp-mode-hook
             (lambda ()
-              (local-set-key "\C-c\C-c"
-                             outline-mode-prefix-map)))
-  (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
+              (setq outline-regexp ";;; \\|(use-package ")
+              (outline-minor-mode)
+              (outline-hide-body)
+              ))
+  :bind ("M-o" . outline-cycle)
   )
 
 
