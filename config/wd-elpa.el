@@ -1,3 +1,5 @@
+;; -*- mode: Emacs-Lisp; outline-regexp: ";;; \\|(use-package "; -*-
+
 (require 'use-package)
 
 ;; 让 shell  变量起作用
@@ -7,7 +9,6 @@
   (when (memq window-system '(mac ns))
     (exec-path-from-shell-initialize))
   )
-
 
 (use-package ample-theme
   :ensure t
@@ -139,6 +140,9 @@
 (use-package helm
   :ensure helm-swoop
   :ensure helm-projectile
+  :ensure helm-ag
+  ;; require brew install the_silver_searcher
+  ;; run helm-do-ag command
   :config
   ; (helm-autoresize-mode t)
   (helm-projectile-on)
@@ -431,6 +435,7 @@
 
 
 (use-package python-magic
+  :ensure outline-magic
   :bind ("M-o" . outline-cycle)
   )
 
@@ -519,10 +524,14 @@
   :bind ("C-c d" . osx-dictionary-search-pointer)
   )
 
-(use-package helm-ag
-  ;; require brew install the_silver_searcher
-  ;; run helm-do-ag command
-  :ensure t
+(use-package outline
+  :config
+  (add-hook 'outline-minor-mode-hook
+            (lambda ()
+              (local-set-key "\C-c\C-c"
+                             outline-mode-prefix-map)))
+  (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
   )
+
 
 (provide 'wd-elpa)
