@@ -197,9 +197,10 @@
     (move-beginning-of-line arg)))
 (define-key global-map (kbd "C-a") 'back-to-indentation-or-beginning)
 
-(use-package osx-dictionary
-  :ensure t
-  :bind ("C-c d" . osx-dictionary-search-pointer)
-  )
+;; proxy
+ (setq url-proxy-services
+       '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+         ("http" . "127.0.0.1:6152")
+         ("https" . "127.0.0.1:6152")))
 
 (provide 'wd-misc)

@@ -25,7 +25,7 @@
  '(cfs--profiles-steps (quote (("profile1" . 4))) t)
  '(package-selected-packages
    (quote
-    (ample-theme exec-path-from-shell osx-dictionary ibuffer-vc rainbow-delimiters rainbow-delimiters-mode guide-key helm-swoop smartparens ox-reveal python-magic flycheck jedi elpy highlight-tail company expand-region easy-kill ace-window smartparens-config lua-mode osx-clipboard magit projectile helm markdown-mode web-mode highlight-symbol yasnippet indent-tools zenburn-theme use-package chinese-fonts-setup))))
+    (helm-projectile helm-ag ample-theme exec-path-from-shell osx-dictionary ibuffer-vc rainbow-delimiters rainbow-delimiters-mode guide-key helm-swoop smartparens ox-reveal python-magic flycheck jedi elpy highlight-tail company expand-region easy-kill ace-window smartparens-config lua-mode osx-clipboard magit projectile helm markdown-mode web-mode highlight-symbol yasnippet indent-tools zenburn-theme use-package chinese-fonts-setup))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

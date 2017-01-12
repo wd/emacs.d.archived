@@ -128,15 +128,24 @@
 ;;   (define-key isearch-mode-map (kbd "C-f") 'isearch-forward-symbol-at-point)
 ;;   )
 
+;; projectile
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-global-mode)
+  )
+
 ;; helm
 (use-package helm
   :ensure helm-swoop
+  :ensure helm-projectile
   :config
   ; (helm-autoresize-mode t)
+  (helm-projectile-on)
   (setq helm-mini-default-sources '(helm-source-buffers-list
-                                  helm-source-bookmarks
-                                  helm-source-recentf
-                                  helm-source-buffer-not-found))
+                                    helm-source-bookmarks
+                                    helm-source-recentf
+                                    helm-source-buffer-not-found))
 
   ;; (set-face-attribute 'helm-selection nil
   ;;                     :background "dark cyan"
@@ -147,13 +156,6 @@
          ("M-x" . helm-M-x)
          ("C-s" . helm-swoop-without-pre-input))
 )
-
-;; projectile
-(use-package projectile
-  :ensure t
-  :config
-  (projectile-global-mode)
-  )
 
 ;; tramp
 (use-package tramp
@@ -510,6 +512,17 @@
   :config
   (setq golden-ratio-auto-scale 1)
   (golden-ratio-mode 1)
+  )
+
+(use-package osx-dictionary
+  :ensure t
+  :bind ("C-c d" . osx-dictionary-search-pointer)
+  )
+
+(use-package helm-ag
+  ;; require brew install the_silver_searcher
+  ;; run helm-do-ag command
+  :ensure t
   )
 
 (provide 'wd-elpa)
