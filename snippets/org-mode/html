@@ -1,7 +1,0 @@
-#name : HTML
-#contributor : Rick Moynihan <rick@sourcesmouth.co.uk>
-#key : html
-# --
-#+BEGIN_HTML
-${0}
-#+END_HTML

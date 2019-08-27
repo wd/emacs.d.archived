@@ -8,33 +8,16 @@
     (exec-path-from-shell-initialize))
   )
 
-(use-package ample-theme
+(use-package color-theme-sanityinc-tomorrow
   :ensure t
   :config
-  (load-theme 'ample t t)
+  (load-theme 'sanityinc-tomorrow-eighties t)
   )
 
-(use-package zenburn-theme
-  :disabled
+(use-package cnfonts
   :ensure t
   :config
-  (load-theme 'zenburn t)
-  )
-
-;; fonts
-(use-package chinese-fonts-setup
-  :ensure t
-  :config
-  (chinese-fonts-setup-enable)
-  )
-
-(use-package ido
-  :config
-  (ido-mode t)
-  (setq ido-max-directory-size 100000)
-  (setq ido-auto-merge-delay-time 2)
-  :bind (("C-x C-f" . ido-find-file)
-         ("C-x C-d" . ido-dired))
+  (cnfonts-enable)
   )
 
 (use-package uniquify
@@ -50,22 +33,58 @@
   (global-whitespace-mode)
 )
 
+;;
+;; org-mode
+;;
 
-(use-package windmove
-  :ensure t
+(use-package org
+  :bind (("C-c t" . org-capture)
+         ("C-c a" . org-agenda))
   :config
-  (windmove-default-keybindings 'meta)
+
+  ;; support org-protocol to capture in browser
+  (server-start)
+  (require 'org-protocol)
+
+  ;; (setq org-archive-location "::* Archived Tasks")
+  (use-package alert
+    :config
+    (setq alert-default-style 'fringe)
+    (setq alert-fade-time 20)
+    )
+
+  (use-package org-alert
+    :ensure t
+    :config
+    ;; (setq alert-default-style 'notifier)
+    (org-alert-enable)
+  )
+  
+  (setq org-archive-location "archive.org::* From %s")
+  (setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/org/inbox.org" "Tasks")
+         "* TODO %?\n%U")
+        ("l" "Todo with link" entry (file+headline "~/org/inbox.org" "Links")
+         "* TODO %?[[%:link][%:description]] %U\n" :prepend t)
+        ("L" "Capture a link from browser" entry (file+headline "~/org/inbox.org" "Links")
+         "* TODO [[%:link][%:description]]\n%u\n\n%:initial"
+         :empty-lines 1)
+        ))
+  (setq org-agenda-files '("~/org"))
+  (setq org-log-done 'note)
+
+  ;; open inbox.org when start emacs
+  (find-file "~/org/inbox.org")
   )
 
 ;;
 ;; snippet
 ;;
 (use-package yasnippet
-  :ensure t
+  :ensure react-snippets
   :config
-  (add-to-list 'yas/snippet-dirs "~/.emacs.d/snippets" 'append)
   (yas-global-mode 1)
-)
+  )
 
 ;; 
 ;; highlight-symbol
@@ -77,7 +96,6 @@
          ("C-c h H" . highlight-symbol-remove-all))
   )
 
-
 ;; 
 ;; web-mode
 ;;
@@ -87,16 +105,22 @@
   (add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.ejs\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
+
   (setq web-mode-markup-indent-offset 4)
   (setq web-mode-css-indent-offset 4)
   (setq web-mode-code-indent-offset 4)
+  (setq web-mode-enable-auto-indentation nil)
 
   (setq web-mode-engines-alist
         '(("angular" . "task.*/.*\\.html\\'"))
         )
 
   (setq web-mode-content-types-alist
-        '(("jsx" . "testProj/.*\\.js\\'"))
+        '(("jsx" . "GeneralAviationForUser/.*/.*\\.js\\'")
+          ("jsx" . "GeneralAviationForManager/.*/.*\\.js\\'")
+          ("jsx" . "Daphne/.*\\.js\\'")
+          ("jsx" . "Coco/.*\\.js\\'"))
         )
 
   (add-hook 'web-mode-hook
@@ -107,7 +131,8 @@
                 ))
 
   (defun my-web-mode-hook ()
-    (setq web-mode-enable-auto-pairing nil))
+    (setq web-mode-enable-auto-pairing nil)
+    )
 
   (add-hook 'web-mode-hook  'my-web-mode-hook)
 )
@@ -120,13 +145,6 @@
                       )
 )
 
-;; ace-isearch
-;; (use-package  ace-isearch
-;;   :config
-;;   (global-ace-isearch-mode +1)
-;;   (define-key isearch-mode-map (kbd "C-f") 'isearch-forward-symbol-at-point)
-;;   )
-
 ;; projectile
 (use-package projectile
   :ensure t
@@ -134,47 +152,29 @@
   (projectile-global-mode)
   )
 
-;; helm
-(use-package helm
-  :ensure helm-swoop
-  :ensure helm-projectile
-  :ensure helm-ag
-  ;; require brew install the_silver_searcher
-  ;; run helm-do-ag command
-  :config
-  ; (helm-autoresize-mode t)
-  (helm-projectile-on)
-  (setq helm-mini-default-sources '(helm-source-buffers-list
-                                    helm-source-bookmarks
-                                    helm-source-recentf
-                                    helm-source-buffer-not-found))
-
-  ;; (set-face-attribute 'helm-selection nil
-  ;;                     :background "dark cyan"
-  ;;                     :foreground "brightwhite"
-  ;;                     )
-
-  :bind (("M-X" . helm-mini)
-         ("M-x" . helm-M-x)
-         ("C-s" . helm-swoop-without-pre-input))
-)
+(use-package counsel-projectile
+  :ensure t
+  )
 
 ;; tramp
 (use-package tramp
-  :config (setq tramp-ssh-controlmaster-options
-              "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no"))
+  :config
+  (setq tramp-ssh-controlmaster-options
+        "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")
+  (add-to-list 'tramp-connection-properties
+               (list (regexp-quote "10.10.8.1") "remote-shell" "sh"))
+  )
 
 ;; magit
 (use-package magit
   :ensure t
-  ;; :bind* ([tab] . magit-section-toggle)
+  :bind* ("C-x g" . magit-status)
   :config
-  ;; (setq magit-auto-revert-mode nil)
+  (setq magit-auto-revert-mode nil)
   (setq magit-last-seen-setup-instructions "1.4.0")
   )
 
 ;; clipboard
-
 (use-package osx-clipboard
   :ensure t
   :config
@@ -183,7 +183,6 @@
 
 
 ;; lua-mode
-
 (use-package lua-mode
   :ensure t
   :config
@@ -191,7 +190,6 @@
   )
 
 ;; smartparens
-
 (use-package smartparens
   :ensure t
   :config
@@ -203,29 +201,23 @@
 
   (sp-local-pair 'web-mode "<" nil :when '(sp-web-mode-is-code-context))
   (smartparens-global-mode)
+  ;;(show-smartparens-global-mode +1)
 )
 
 
-;; avy & ace-window
-;; (use-package avy
-;;   :config
-;;   ;; (define-key isearch-mode-map (kbd "M-s") 'avy-isearch)
-;;   ;; (define-key isearch-mode-map (kbd "M-f") 'helm-swoop-from-isearch)
-;;   ;; M-i already do this
-;;   )
-
-
-;; (use-package ace-window
-;;   :ensure t
-;;   :config
-;;   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-;; ;;  (setq aw-ignore-current t)
-;;   (global-set-key (kbd "C-x o") #'ace-window)
-;;   ;; (custom-set-faces
-;;   ;;  '(aw-leading-char-face
-;;   ;;    ((t (:height 20.0 )))
-;;   ;;    ))
-;;   )
+(use-package ace-window
+  :ensure t
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  ;; (setq aw-ignore-current t)
+  (global-set-key (kbd "C-M-h") #'ace-window)
+  ;; (custom-set-faces
+  ;;  '(aw-leading-char-face
+  ;;    ((t
+  ;;      (:height 10.0 :foreground "gold")
+  ;;      ))
+  ;;    ))
+  )
 
 
 (use-package easy-kill
@@ -240,106 +232,106 @@
   :bind ("M-m" . er/expand-region)
   )
 
-(defun check-expansion ()
-  (save-excursion
-    (if (looking-at "\\_>") t
-      (backward-char 1)
-      (if (looking-at "\\.") t
-        (backward-char 1)
-        (if (looking-at "->") t nil)))))
-
-;; (defun do-yas-expand ()
-;;   (let ((yas/fallback-behavior 'return-nil))
-;;     (yas/expand)))
-
-(defun tab-indent-or-complete ()
-  (interactive)
-  (if (minibufferp)
-      (minibuffer-complete)
-    ;; (if (or (not yas/minor-mode)
-    ;;         (null (do-yas-expand)))
-    (if (check-expansion)
-        (company-complete-common)
-      (indent-for-tab-command))))
-;)
-
 ;; company-mode
 (use-package company
   :ensure t
+  :init
+  (setq company-minimum-prefix-length 2)
+  ;; (setq company-dabbrev-ignore-case t)
+  ;; (setq company-idle-delay t)
   :config
-  ;; (company-quickhelp-mode)
   (add-hook 'after-init-hook 'global-company-mode)
-  ;; (let* (
-  ;;        ;;(background (if window-system "#263238" nil)))
-  ;;       (background (if window-system "dark slate gray" "dark slate gray")))
-  ;;   (custom-set-faces
-  ;;    `(company-tooltip ((t (:inherit default :foreground "yellow" :background ,background))))
-  ;;    `(company-tooltip-common ((t (:inherit default :weight bold :background ,background))))
-  ;;    `(company-tooltip-selection ((t (:inherit default :background "#90A4AE"))))
-  ;;    ;; `(company-scrollbar-bg ((t (:background ,(color-lighten-name bg 10)))))
-  ;;    ;; `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 5)))))
-  ;;    `(company-preview-common ((t (:inherit default :foreground "yellow" :background ,background))))
-  ;;    `(company-tooltip-annotation ((t (:inherit default :foreground "red" :background ,background))))
-  ;;    `(company-tooltip-annotation-selection ((t (:inherit company-tooltip-selection))))
-  ;;    )
-  ;;   )
-
   (define-key company-active-map (kbd "C-n") #'company-select-next)
   (define-key company-active-map (kbd "C-p") #'company-select-previous)
-  ;; (global-set-key [tab] 'tab-indent-or-complete)
+  (define-key company-active-map (kbd "C-s") #'company-filter-candidates)
 
-  ;; Add yasnippet support for all company backends
-  ;; https://github.com/syl20bnr/spacemacs/pull/179
-  (defvar company-mode/enable-yas t "Enable yasnippet for all backends.")
+  (require 'company-my-backend)
 
-  (defun company-mode/backend-with-yas (backend)
-    (if (or (not company-mode/enable-yas) (and (listp backend)    (member 'company-yasnippet backend)))
-        backend
-      (append (if (consp backend) backend (list backend))
-              '(:with company-yasnippet))))
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (set (make-local-variable 'company-backends)
+                   '(
+                      company-tide
+                      company-react
+                      ;; company-dabbrev-code
+                      ;; company-keywords
+                      company-files
+                      company-yasnippet))))
 
-  (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
+  ;; (add-to-list 'company-backends '(company-yasnippet
+  ;;                                   company-files
+  ;;                                   company-dabbrev-code
+  ;;                                   company-keywords
+  ;;                                   ))
+
+  (global-set-key (kbd "C-c y") 'company-yasnippet)
+
+  ;; (add-hook 'python-mode-hook
+  ;;           (lambda ()
+  ;;             (add-to-list 'company-backends 'company-yasnippet)
+  ;;             ))
   )
 
-;; Flx-ido
+;; ivy swiper
+(defun my-ivy-yank-word ()
+  (interactive)
+  (let (amend)
+    (with-selected-window (ivy-state-window ivy-last)
+      (goto-char swiper--opoint)
+      (setq amend (thing-at-point 'symbol)))
+    (when amend (insert amend))))
 
-;; (use-package flx-ido
-;;   :config
-;;   (ido-mode 1)
-;;   (ido-everywhere 1)
-;;   (flx-ido-mode 1)
-;;   ;; disable ido faces to see flx highlights.
-;;   (setq ido-enable-flex-matching t)
-;;   (setq ido-use-faces nil)
-;;   )
+(use-package counsel
+  :ensure t
+  :bind (("C-c i" . counsel-projectile-ag)
+         ("M-x" . counsel-M-x)
+         ("C-c f" . counsel-projectile-find-file)
+         ("M-X" . ivy-switch-buffer)
+         ("C-c v" . counsel-imenu)
+         )
+  :init
+  (setq recentf-max-saved-items 200)
+  ;; (setq ivy-virtual-abbreviate 'full)
+  :config
+  (use-package wgrep :ensure t)
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t ; treat recentf, bookmarks as virtual buffers.
+        ivy-height 10
+        ivy-display-style 'fancy
+        ivy-count-format "(%d/%d) "
+        ivy-initial-inputs-alist nil ; remove initial ^ input.
+        ivy-extra-directories nil ; remove . and .. directory.
+        ivy-wrap nil
+        )
+  
+  (set-variable 'ivy-on-del-error-function '(lambda()))
 
+  ;; (ivy-add-actions
+  ;;  'counsel-find-file
+  ;;  '(("g" counsel-find-file-ag-action "grep")))
+  )
 
-;; ;; ivy swiper
-;; (defun wd-swiper-at-point ()
-;;   "Pull next word from buffer into search string."
-;;   (interactive)
-;;   (let (query)
-;;     (with-ivy-window
-;;       (let ((tmp (symbol-at-point)))
-;;         (setq query tmp)))
-;;     (when query
-;;       (insert (format "%s" query))
-;;       )))
+(use-package ivy-rich
+  :ensure t
+  :after ivy
+  :custom
+  (ivy-virtual-abbreviate 'full
+                          ivy-rich-switch-buffer-align-virtual-buffer t
+                          ivy-rich-path-style 'abbrev)
+  :config
+  (ivy-rich-mode 1)
+)
 
-;; (use-package ivy
-;;   :config
-;;   (ivy-mode 1)
-;;   (setq ivy-use-virtual-buffers t)
-;;   (set-variable 'ivy-on-del-error-function '(lambda()))
-;;   ;; (global-set-key "\C-s" 'wd-swiper-at-point)
-;;   )
-
-;; (use-package swiper
-;;   :config
-;;   (global-set-key "\C-s" 'swiper)
-;;   (define-key swiper-map (kbd "C-w") 'wd-swiper-at-point)
-;;   (define-key swiper-map (kbd "C-f") 'swiper-avy)
-;;   )
+(use-package swiper
+  :after ivy
+  :ensure t
+  :bind (("C-s" . swiper-isearch)
+         :map swiper-map
+         ("M-q" . swiper-query-replace)
+         ("C-w" . my-ivy-yank-word)
+         ("C-'" . swiper-avy)
+         )
+  )
 
 ;; "M-q" swiper-query-replace
 ;; "C-l" swiper-recenter-top-bottom
@@ -350,7 +342,8 @@
 ;; avy
 (use-package avy
   :ensure t
-  :bind ("M-s" . avy-goto-char-timer)
+  :bind (("M-s" . avy-goto-char-timer)
+         ("C-." . avy-pop-mark))
   )
 
 ;;
@@ -380,38 +373,19 @@
         )
   )
 
-;; (setq cperl-highlight-variables-indiscriminately t)
-;; (add-hook 'cperl-mode-hook 'sl-highlight-todo)
-
 (use-package guide-key
   :ensure t
   :config
-  (setq guide-key/guide-key-sequence '("C-x r" "C-x 4" "C-c"))
+  (setq guide-key/guide-key-sequence '("C-x r" "C-x 4" "C-c" "<SPC>"))
   (setq guide-key/recursive-key-sequence-flag t)
   (setq guide-key/popup-window-position :bottom)
   (guide-key-mode 1)
   )
 
-(use-package hydra
-  :ensure t
-  :config
-  (defhydra hydra-switch (:post (progn
-                                   (message
-                                    "Thank you, come again.")))
-    "switch window"
-    ("l" windmove-right)
-    ("h" windmove-left)
-    ("j" windmove-down)
-    ("k" windmove-up)
-    ("q" nil "quit")
-    )
-  :bind ("C-c o" . hydra-switch/body)
-  )
-
 (use-package rainbow-delimiters
   :ensure t
   :config
-  (add-hook 'lisp-mode #'rainbow-delimiters-mode)
+  (add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
   )
 
 (use-package ox-reveal
@@ -422,70 +396,55 @@
   :mode "\\.py\\'"
   :interpreter (("python" . python-mode)
                 ("python3" . python-mode)
-                 )
-  :config
-  (add-hook 'python-mode-hook
-       (lambda ()
-         (set (make-variable-buffer-local 'beginning-of-defun-function)
-               'py-beginning-of-def-or-class)
-         (setq outline-regexp "def\\|class ")))
+                )
   )
 
-
-(use-package python-magic
-  :ensure outline-magic
-  :config
-  (add-hook 'python-mode-hook 'my-python-outline-hook)
-  )
+(use-package add-node-modules-path
+  :ensure t
+)
 
 (use-package flycheck
   :ensure t
+  :init
+  (eval-after-load 'web-mode
+    '(add-hook 'web-mode-hook #'add-node-modules-path))
   :config
   (global-flycheck-mode t)
-  (setq-default flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc))
+  (setq-default flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc tsx-tide))
+
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
 )
 
-(defun my/python-mode-hook ()
-  (add-to-list 'company-backends 'company-jedi))
 
-(use-package jedi
-  :ensure t
-  :init
-  (add-hook 'python-mode-hook 'my/python-mode-hook)
-  )
-
-;;; pythgon elpy
-(use-package elpy
-  :ensure
-  :init
-  (setq elpy-rpc-backend "jedi")
-  (elpy-enable)
-  (elpy-use-ipython)
-  :bind (("M-*" . pop-tag-mark))
-  )
-
-;;; hightlight-tail
-(use-package highlight-tail
+(use-package highlight-indentation
   :ensure t
   :config
-  ;; (setq highlight-tail-colors 
-  ;;       '(("balck" . 0)
-  ;;         ("white" . 25)
-  ;;         ))
-
-  (setq highlight-tail-colors '(("black" . 0)
-                              ("#bc2525" . 25)
-                              ("black" . 100)))
-  (highlight-tail-mode)
+  (add-hook 'python-mode-hook 'highlight-indentation-mode)
   )
+
+
+;;; hightlight-tail
+;; (use-package highlight-tail
+;;   :ensure t
+;;   :config
+;;   ;; (setq highlight-tail-colors 
+;;   ;;       '(("balck" . 0)
+;;   ;;         ("white" . 25)
+;;   ;;         ))
+
+;;   (setq highlight-tail-colors '(("black" . 0)
+;;                               ("#bc2525" . 25)
+;;                               ("black" . 100)))
+;;   (highlight-tail-mode)
+;;   )
 
 ;;; indent-tools
 (use-package indent-tools
   :ensure t
-  :init
-  (add-hook 'python-mode-hook
-            (lambda () (define-key python-mode-map (kbd "C-c >") 'indent-tools-hydra/body))
-            )
+  ;; :init
+  ;; (add-hook 'python-mode-hook
+  ;;           (lambda () (define-key python-mode-map (kbd "C-c i") 'indent-tools-hydra/body))
+  ;;           )
   )
 
 
@@ -494,9 +453,36 @@
   :config
   (add-hook 'ibuffer-hook
     (lambda ()
+
+      (face-remap-add-relative 'default 'font-lock-comment-face)
+      (copy-face 'font-lock-keyword-face 'tempface )
+      (setq ibuffer-filter-group-name-face 'tempface)
+      (face-remap-add-relative ibuffer-filter-group-name-face font-lock-doc-face)
       (ibuffer-vc-set-filter-groups-by-vc-root)
       (unless (eq ibuffer-sorting-mode 'alphabetic)
         (ibuffer-do-sort-by-alphabetic))))
+
+  (defconst gcs-ibuffer-fontification-alist
+    '((ruby-mode . font-lock-string-face)
+      (sh-mode . font-lock-string-face)
+      (objc-mode . font-lock-constant-face)
+      (c-mode . font-lock-constant-face)
+      (java-mode . font-lock-constant-face)
+      (emacs-lisp-mode . font-lock-variable-name-face)
+      (org-mode . font-lock-negation-char-face)
+      (dired-mode . font-lock-function-name-face)
+      (term-mode . font-lock-doc-string-face)
+      (python-mode . font-lock-variable-name-face)))
+  
+  (setq ibuffer-fontification-alist
+        `(,@(mapcar (lambda (b)
+                      `(9999 (eq major-mode ',(car b)) ,(cdr b)))
+                    gcs-ibuffer-fontification-alist)
+          (90 (string-match "magit" (symbol-name major-mode))
+              font-lock-function-name-face)
+          (90 (or (string-match "^*" (buffer-name))
+                  (memq major-mode ibuffer-help-buffer-modes))
+              font-lock-comment-face)))
 
   (setq ibuffer-formats
       '((mark modified read-only vc-status-mini " "
@@ -509,30 +495,145 @@
               (vc-status 16 16 :left)
               " "
               filename-and-process)))
+  ;; (define-key ibuffer-mode-map (kbd "C-g") 'quit-window)
+  ;; (define-key ibuffer-mode-map (kbd "j") 'ibuffer-forward-line)
+  ;; (define-key ibuffer-mode-map (kbd "k") 'ibuffer-backward-line)
+  ;; (define-key ibuffer-mode-map (kbd "C-n") 'ibuffer-forward-filter-group)
+  ;; (define-key ibuffer-mode-map (kbd "C-p") 'ibuffer-backward-filter-group)
   :bind ("C-x C-b" . ibuffer))
 
-(use-package golden-ratio
-  :ensure t
-  :config
-  (setq golden-ratio-auto-scale 1)
-  (golden-ratio-mode 1)
-  )
+;; (use-package golden-ratio
+;;   :ensure t
+;;   :config
+;;   (setq golden-ratio-auto-scale 1)
+;;   (golden-ratio-mode 1)
+;;   )
 
 (use-package osx-dictionary
   :ensure t
   :bind ("C-c d" . osx-dictionary-search-pointer)
   )
 
-(use-package outline
-  :config
-  (add-hook 'emacs-lisp-mode-hook
-            (lambda ()
-              (setq outline-regexp ";;; \\|(use-package ")
-              (outline-minor-mode)
-              (outline-hide-body)
-              ))
-  :bind ("M-o" . outline-cycle)
+(use-package bing-dict
+  :ensure t
+  :bind ("C-c e" . bing-dict-brief)
   )
 
+;; (use-package outline
+;;   :config
+;;   (add-hook 'emacs-lisp-mode-hook
+;;             (lambda ()
+;;               (setq outline-regexp ";;; \\|(use-package ")
+;;               (outline-minor-mode)
+;;               (outline-hide-body)
+;;               ))
+;;   :bind ("M-o" . outline-cycle)
+;;   ;; C-c @ C-a expand all
+;;   )
 
+(use-package fic-mode
+  :ensure t
+  :config
+  (add-hook 'emacs-lisp-mode-hook 'fic-mode)
+  (add-hook 'python-mode-hook 'fic-mode)
+  )
+
+(use-package yaml-mode
+  :ensure t
+  :mode "\\.yml$"
+  )
+
+(use-package lsp-python-ms
+  :ensure t
+  :demand nil
+  :config
+
+  ;;(setq lsp-python-ms-extra-paths "")
+  (setq lsp-python-ms-executable
+        (string-trim (shell-command-to-string
+                      "find ~/.vscode/extensions/ -name 'Microsoft.Python.LanguageServer' | sort | tail -1")))
+  ;; for dev build of language server
+  (setq lsp-python-ms-dir
+        (file-name-directory lsp-python-ms-executable)))
+
+
+(use-package lsp-mode
+  :ensure t
+  :commands lsp
+  :hook  (python-mode . (lambda ()
+                          (pipenv-activate)
+                          (require 'lsp-python-ms)
+                          (lsp)))
+  :config
+
+  (setq lsp-auto-configure nil)
+
+  (use-package pipenv
+    :ensure t
+    :init
+    (setq
+     pipenv-projectile-after-switch-function
+     #'pipenv-projectile-after-switch-extended))
+
+  (use-package company-lsp
+    :ensure t
+    :config
+    (add-to-list 'company-backends 'company-lsp)
+    )
+
+  ;; (use-package lsp-ui
+  ;;   :ensure t
+  ;;   :config
+  ;;   (setq lsp-prefer-flymake nil)
+
+
+  ;;   (require 'lsp-ui-flycheck)
+  ;;   (with-eval-after-load 'lsp-mode
+  ;;     (add-hook 'lsp-after-open-hook
+  ;;               (lambda ()
+  ;;                 (setq-local flycheck-checker 'python-flake8)
+  ;;                 (flycheck-add-next-checker 'python-flake8 'lsp-ui)
+  ;;                 (lsp-ui-flycheck-add-mode major-mode)
+  ;;                 (add-to-list 'flycheck-checkers 'lsp-ui)
+  ;;                 (add-hook 'lsp-after-diagnostics-hook 'lsp-ui-flycheck--report nil t)
+  ;;                 )
+  ;;               ))
+
+  ;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+  ;;   )
+
+
+
+;; (use-package lsp-javascript-typescript
+;;   :ensure t
+;;   :config
+;;   (defun my-company-transformer (candidates)
+;;     (let ((completion-ignore-case t))
+;;       (all-completions (company-grab-symbol) candidates)))
+
+;;   (defun my-js-hook nil
+;;     (make-local-variable 'company-transformers)
+;;     (push 'my-company-transformer company-transformers))
+
+;;   (add-hook 'web-mode-hook 'my-js-hook)
+;;   (add-hook 'web-mode-hook #'lsp-javascript-typescript-enable)
+;;   )
+
+  )
+
+(use-package easy-hugo
+  :init
+  (setq easy-hugo-basedir "~/blog/")
+  (setq easy-hugo-url "https://wdicc.com")
+  (setq easy-hugo-postdir "content/post")
+  (setq easy-hugo-previewtime "300")
+  (setq easy-hugo-default-ext ".org")
+  :bind ("C-c C-e" . easy-hugo)
+  )
+
+(use-package ivy-yasnippet
+  :ensure t
+  )
+
+;;; wd-elpa ends
 (provide 'wd-elpa)

@@ -1,13 +1,92 @@
-(if (window-system)
-    (set-frame-size
-     (selected-frame) 120 50))
+(defun wd-set-window-pos2 (&optional main-screen-width &optional main-screen-height)
+   "Set emacs window at proper position"
+   (unless main-screen-height (setq main-screen-height 900))
+   (unless main-screen-width (setq main-screen-width 1440))
+   (let ((display-height (x-display-pixel-height))
+         (display-width (x-display-pixel-width))
+         (margin-left 300)
+         (margin-top 0))
+     (if (or (> display-width main-screen-width)
+             (> display-height main-screen-height))
+         (modify-frame-parameters (selected-frame) (list (cons 'left  (+ margin-left)) (cons 'top  (+ -1080))))
+       (modify-frame-parameters (selected-frame) (list (cons 'left (+ margin-left)) (cons 'top (+ 0))))
+       )
+     (set-frame-size (selected-frame) 120 50))
+   )
+
+
+(defun wd-set-window-pos (&optional main-screen-width &optional main-screen-height)
+   "Set emacs window at proper position"
+   (unless main-screen-height (setq main-screen-height 900))
+   (unless main-screen-width (setq main-screen-width 1440))
+   (let ((display-height (x-display-pixel-height))
+         (display-width (x-display-pixel-width))
+         (margin-left 300)
+         (margin-top 0))
+     (if (or (> display-width main-screen-width)
+             (> display-height main-screen-height))
+         (progn
+           (setq margin-top -900))
+       )
+     (message "left %s, top %s" margin-left margin-top)
+     (modify-frame-parameters (selected-frame) '((left . (+ margin-left)) (top . (+ margin-top))))
+     (set-frame-size (selected-frame) 120 50))
+   )
+
+(defun wd-fullscreen ()
+  (interactive)
+  (set-frame-parameter nil 'fullscreen 'fullscreen)
+)
+
+(defun wd-halfscreen ()
+  (interactive)
+  (setq half-display-height (/ (x-display-pixel-height) 2)
+        half-display-width (/ (x-display-pixel-width) 2))
+  
+  (setq margin-left (/ half-display-width 4)
+        margin-top (/ half-display-height 4))
+
+  ;; (setq initial-frame-alist
+  ;;       '(
+  ;;         (width . half-display-width)
+  ;;         (height . half-display-height)
+  ;;         (left . 50)
+  ;;         (top . 50)))
+  ;; (setq default-frame-alist
+  ;;       '(
+  ;;         (width . half-display-width)
+  ;;         (height . half-display-height)
+  ;;         (left . 50)
+  ;;         (top . 50))))
+
+  (set-frame-size (selected-frame) 200 50)
+  (set-frame-position (selected-frame) margin-left margin-top)
+)
+
+(when (window-system)
+  ;; (setq wd-my-main-screen-width 1440) ;; You can use (x-display-pixel-height) to get this value
+  ;; (setq wd-my-main-screen-height 900)
+  ;; (wd-set-window-pos2
+  ;;  wd-my-main-screen-width
+  ;;  wd-my-main-screen-height)
+  ;;(frame-parameters)
+
+  ;; emacs-mac has three behaviors: fullboth, fullscreen, and maximized.
+  ;; fullboth means "old-style fullscreen, just covering the entire normal desktop",
+  ;; and fullscreen means "use native fullscreen support", similar to what fullboth means in the GNU ns frontend.
+  ;;(set-frame-parameter nil 'fullscreen 'fullscreen)
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (wd-halfscreen)
+  )
 
 (setq exec-path (append exec-path '("~/bin/") ))
 
-;; set python-mode use ipython global
-(setenv "IPY_TEST_SIMPLE_PROMPT" "1")
-(setq python-shell-interpreter "/Users/wd/.pyenv/shims/ipython"
-      python-shell-interpreter-args "-i")
+;; ;; set python-mode use ipython global
+;; (setenv "IPY_TEST_SIMPLE_PROMPT" "1")
+;; (setq python-shell-interpreter "/Users/wd/.pyenv/shims/ipython"
+;;       python-shell-interpreter-args "-i")
 
 
 ;;
@@ -25,9 +104,6 @@
 ;;
 ;; misc settings
 ;; 
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
 (mouse-wheel-mode 1)
 ;; 不弹出图形界面的确认窗口
 (setq use-dialog-box nil)
@@ -41,8 +117,7 @@
   (setq mac-option-modifier 'meta)
   (setq mac-command-modifier 'meta)
   (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
-  (menu-bar-mode 1)
-  )
+)
 
 
 ;; 和x公用剪贴板
@@ -73,6 +148,7 @@
 ;; 语法高亮
 (global-font-lock-mode t)
 
+
 ;; 个人信息
 (setq user-full-name "Wang Dong")
 (setq user-mail-address "wd@wdicc.com")
@@ -96,6 +172,9 @@
 ;; (setq longlines-auto-wrap t)
 ;; (add-hook 'text-mode-hook 'longlines-mode)
 ;; (add-hook 'text-mode-hook 'turn-on-auto-fill)
+
+;; 打开文件的时候定位到上次的位置
+(save-place-mode 1)
 
 ;; 所有的备份文件转移到~/backups目录下
 (setq auto-save-default nil)
@@ -199,8 +278,24 @@
 
 ;; proxy
  (setq url-proxy-services
-       '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+       '(("no_proxy" . "^\\(127.0.0.1\\|localhost\\|10.*\\)")
          ("http" . "127.0.0.1:6152")
          ("https" . "127.0.0.1:6152")))
+
+
+;; unset C- and M- digit keys
+(dotimes (n 10)
+  (global-unset-key (kbd (format "C-%d" n)))
+  (global-unset-key (kbd (format "M-%d" n)))
+  )
+
+;; ;; set up my own map
+;; (define-prefix-command 'bjm-map)
+;; (global-set-key (kbd "C-1") 'bjm-map)
+;; (define-key bjm-map (kbd "m") 'mu4e)
+;; (define-key bjm-map (kbd "g") 'bjm/open-gcal-agenda)
+
+;; org-mode
+(setq org-startup-truncated nil)
 
 (provide 'wd-misc)

@@ -5,3 +5,6 @@ ido.last
 projectile-bookmarks.eld
 recentf
 auto-save-list
+/places
+/transient/history.el
+/.lsp-session-v1

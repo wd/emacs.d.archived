@@ -1,9 +1,0 @@
-#name : CODE
-#contributor : Rick Moynihan <rick@sourcesmouth.co.uk>
-#key : code
-# --
-#+BEGIN_HTML
-<pre lang="${1}">
-${0}
-</pre>
-#+END_HTML

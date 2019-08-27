@@ -48,7 +48,8 @@
 
 (defun my-python-outline-hook ()
   ;; (setq outline-regexp "[ \t]*# \\|[ \t]+\\(class\\|def\\|if\\|elif\\|else\\|while\\|for\\|try\\|except\\|with\\) ")
-  (setq outline-regexp "[ \t]*\\(class \\|def \\)")
+  ;; (setq outline-regexp "[ \t]*\\(class \\|def \\)")
+  (setq outline-regexp "@\\|\\([ \t]*\\(def \\|class \\|@.*.setter\\|@property\\)\\)")
   ;; (setq outline-regexp " *\\(def \\|clas\\|#hea\\)")
   (setq outline-level 'py-outline-level)
 
