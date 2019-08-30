@@ -8,3 +8,5 @@ auto-save-list
 /places
 /transient/history.el
 /.lsp-session-v1
+/smex-items
+/tramp

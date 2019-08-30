@@ -54,7 +54,7 @@
     )
 
   (use-package org-alert
-    :ensure t
+    ;; :ensure t
     :config
     ;; (setq alert-default-style 'notifier)
     (org-alert-enable)
