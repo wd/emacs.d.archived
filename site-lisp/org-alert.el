@@ -51,6 +51,9 @@
 (defvar org-alert-headline-regexp "\\(Sched.+:.+\\|Deadline:.+\\)"
   "Regexp for headlines to search in agenda buffer.")
 
+(defvar org-alert-alert-before nil
+  "Only alert before in minutes when task due, nil means alert all day.")
+
 (defun org-alert--strip-prefix (headline)
   "Remove the scheduled/deadline prefix from HEADLINE."
   (replace-regexp-in-string ".*:\s+" "" headline))
@@ -75,7 +78,9 @@
                         (float-time
                          (date-to-time
                           (current-time-string))))))
-            (> diff (* 30 60)) ;; if diff > 30min return true
+            (if org-alert-alert-before
+                (> diff (* org-alert-alert-before 60)) ;; if diff > 30min return true
+              nil)
             )))
     (split-string agenda "\n"))
    "\n")

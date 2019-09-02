@@ -57,6 +57,7 @@
     ;; :ensure t
     :config
     ;; (setq alert-default-style 'notifier)
+    (setq org-alert-alert-before 30)
     (org-alert-enable)
   )
   
