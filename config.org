@@ -5,6 +5,7 @@
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 (setq exec-path (append exec-path '("/usr/local/bin")))
 (setq exec-path (append exec-path '("~/bin/") ))
+(setq default-directory "~/")
 #+END_SRC
 
 ** Setup packages
@@ -519,6 +520,10 @@
 
 ** magit
 #+BEGIN_SRC emacs-lisp
+(use-package forge
+  :ensure t
+  :after magit)
+  
   (use-package magit
     :ensure t
     :bind* ("C-x g" . magit-status)
@@ -623,6 +628,13 @@
     ;;           (lambda ()
     ;;             (add-to-list 'company-backends 'company-yasnippet)
     ;;             ))
+
+    (use-package company-terraform
+    :ensure t
+    :config
+    (company-terraform-init)
+    )
+
     )
 #+END_SRC
 
@@ -886,37 +898,27 @@
 #+END_SRC   
 ** lsp
 #+BEGIN_SRC emacs-lisp
-  (use-package lsp-python-ms
-    :ensure t
-    :demand nil
-    :config
-
-    ;;(setq lsp-python-ms-extra-paths "")
-    (setq lsp-python-ms-executable
-          (string-trim (shell-command-to-string
-                        "find ~/.vscode/extensions/ -name 'Microsoft.Python.LanguageServer' | sort | tail -1")))
-    ;; for dev build of language server
-    (setq lsp-python-ms-dir
-          (file-name-directory lsp-python-ms-executable)))
-
-
   (use-package lsp-mode
     :ensure t
     :commands lsp
-    :hook  (python-mode . (lambda ()
-                            (pipenv-activate)
-                            (require 'lsp-python-ms)
-                            (lsp)))
+    :hook (python-mode . (lambda ()
+                          (require 'lsp-python-ms)
+                          (lsp)))
+
     :config
+    ;(setq lsp-auto-configure nil)
 
-    (setq lsp-auto-configure nil)
-
-    (use-package pipenv
+    (use-package lsp-python-ms
+      :ensure t
+    )
+    
+    (use-package conda
       :ensure t
       :init
-      (setq
-       pipenv-projectile-after-switch-function
-       #'pipenv-projectile-after-switch-extended))
+      (custom-set-variables
+        '(conda-anaconda-home "/usr/local/Caskroom/miniconda/base/"))
+      (conda-env-autoactivate-mode t)
+    )
 
     (use-package company-lsp
       :ensure t
@@ -925,45 +927,8 @@
       )
 
     (use-package lsp-ivy)
-
-    ;; (use-package lsp-ui
-    ;;   :ensure t
-    ;;   :config
-    ;;   (setq lsp-prefer-flymake nil)
-
-
-    ;;   (require 'lsp-ui-flycheck)
-    ;;   (with-eval-after-load 'lsp-mode
-    ;;     (add-hook 'lsp-after-open-hook
-    ;;               (lambda ()
-    ;;                 (setq-local flycheck-checker 'python-flake8)
-    ;;                 (flycheck-add-next-checker 'python-flake8 'lsp-ui)
-    ;;                 (lsp-ui-flycheck-add-mode major-mode)
-    ;;                 (add-to-list 'flycheck-checkers 'lsp-ui)
-    ;;                 (add-hook 'lsp-after-diagnostics-hook 'lsp-ui-flycheck--report nil t)
-    ;;                 )
-    ;;               ))
-
-    ;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-    ;;   )
-
-
-
-  ;; (use-package lsp-javascript-typescript
-  ;;   :ensure t
-  ;;   :config
-  ;;   (defun my-company-transformer (candidates)
-  ;;     (let ((completion-ignore-case t))
-  ;;       (all-completions (company-grab-symbol) candidates)))
-
-  ;;   (defun my-js-hook nil
-  ;;     (make-local-variable 'company-transformers)
-  ;;     (push 'my-company-transformer company-transformers))
-
-  ;;   (add-hook 'web-mode-hook 'my-js-hook)
-  ;;   (add-hook 'web-mode-hook #'lsp-javascript-typescript-enable)
-  ;;   )
-
+    (use-package lsp-ui
+      :ensure t
     )
 #+END_SRC   
 ** Misc
@@ -1010,4 +975,13 @@
       (process-send-string name (format "CONNECT %s:%d HTTP/1.1\n\n" host service))
       tmp-process))
   (setq erc-server-connect-function 'open-http-proxy-stream)
+
+  ;;
+  ;; terraform
+  ;;
+  (use-package terraform-mode
+  :ensure t
+  :config
+  (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
+  )
 #+END_SRC

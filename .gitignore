@@ -11,3 +11,5 @@ auto-save-list
 /.lsp-session-v1
 /smex-items
 /tramp
+/.cache/
+/forge-database.sqlite
