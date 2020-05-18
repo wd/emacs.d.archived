@@ -906,12 +906,10 @@
                           (lsp)))
 
     :config
-    ;(setq lsp-auto-configure nil)
-
     (use-package lsp-python-ms
       :ensure t
     )
-    
+
     (use-package conda
       :ensure t
       :init
@@ -930,6 +928,7 @@
     (use-package lsp-ui
       :ensure t
     )
+)
 #+END_SRC   
 ** Misc
 #+BEGIN_SRC emacs-lisp
